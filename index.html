@@ -406,8 +406,8 @@ function calc() {
   const kAb7    = Math.max(0, parseInt(document.getElementById('kinderAb7').value)     || 0);
   const kUnter7 = Math.max(0, parseInt(document.getElementById('kinderUnter7').value)  || 0);
 
-  // Hide extras for long stays (>= 28 nights) as they are included
-  document.getElementById('extras-section').style.display = nächte >= 28 ? 'none' : 'block';
+  // Always show extras
+  document.getElementById('extras-section').style.display = 'block';
   infoEl.textContent = `${nächte} Nacht${nächte !== 1 ? 'e' : ''} (${wt} Wochentag${wt !== 1 ? 'e' : ''}, ${we} Wochenend-Nacht${we !== 1 ? 'e' : ''})`;
 
   const gesPers       = erw + kAb7;
@@ -423,9 +423,13 @@ function calc() {
   let unterkunft = brutto;
 
   if (nächte >= 7) {
-    const baseBrutto = wt * 60 + we * 75;
-    const nettoBase  = lagrangeDiscount(nächte);
-    const ratio      = nettoBase / baseBrutto;
+    // Derive discount ratio from the curve, capped at night 28.
+    // Use actual wt/we split scaled to the capped night count as reference base.
+    const cappedN    = Math.min(nächte, 28);
+    const scale      = cappedN / nächte;
+    const refBase    = Math.round((wt * scale) * 60 + (we * scale) * 75);
+    const nettoBase  = lagrangeDiscount(cappedN);
+    const ratio      = nettoBase / refBase;
     unterkunft       = Math.round(brutto * ratio);
     const rabatt     = brutto - unterkunft;
     const pct        = Math.round((1 - ratio) * 1000) / 10;
@@ -433,18 +437,13 @@ function calc() {
     rows.push({ label: 'Unterkunft nach Rabatt', val: fmtEur(unterkunft) });
   }
 
-  const bett = nächte >= 28 ? 0 : (document.getElementById('bettwasche').checked ? 10 : 0);
+  const bett = document.getElementById('bettwasche').checked ? 10 : 0;
   if (bett) rows.push({ label: 'Bettwäsche & Handtücher', val: fmtEur(bett) });
-
-  if (nächte >= 28) {
-    rows.push({ label: 'Bettwäsche, Reinigung & NK', val: 'inklusive', info: true });
-  } else {
-    rows.push({ label: 'Endreinigung & Nebenkosten', val: fmtEur(20) });
-  }
+  rows.push({ label: 'Endreinigung & Nebenkosten', val: fmtEur(20) });
 
   rows.push({ divider: true });
 
-  const total = unterkunft + bett + (nächte >= 28 ? 0 : 20);
+  const total = unterkunft + bett + 20;
   rows.push({ label: 'Gesamt', val: fmtEur(total), total: true });
   document.getElementById('result-rows').innerHTML = renderRows(rows);
   updateContactButtons(nächte, von, bis, erw, kAb7, kUnter7, total);
