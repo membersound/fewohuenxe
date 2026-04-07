@@ -313,8 +313,8 @@ const LONGTERM_THRESHOLD = 28;
 const LONGTERM_RATE      = 850 / 30; // € per night
 const _O = 7; // ASCII offset
 const _d = arr => arr.map(c => String.fromCharCode(c - _O)).join('');
-const WHATSAPP_NUMBER = _d([55,56,49,55,55,56,55,56,57,56,57,56]);
-const MAIL_ADDRESS    = _d([109,108,136,119,121,133,108,117,137,108,71,116,121,104,112,115,53,106,119,121]);
+const WHATSAPP_NUMBER = _d([59,64,56,62,62,64,62,59,57,56,57,56]);
+const MAIL_ADDRESS    = _d([109,108,126,118,111,124,108,117,127,108,71,110,116,104,112,115,53,106,118,116]);
 
 // Lagrange interpolation through 4 control points (nights → netto without extras)
 // Targets: 7→370, 14→570, 21→700, 28→820 (excl. 30€ extras)
